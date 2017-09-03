@@ -7,16 +7,20 @@ import rltut.World;
 import rltut.WorldBuilder;
 
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayScreen implements Screen {
     private World world;
     private Creature player;
     private int screenWidth;
     private int screenHeight;
+    private List<String> messages;
 
     public PlayScreen() {
         screenWidth = 80;
         screenHeight = 21;
+        messages = new ArrayList<>();
         createWorld();
         CreatureFactory creatureFactory = new CreatureFactory(world);
         createCreatures(creatureFactory);
@@ -30,6 +34,7 @@ public class PlayScreen implements Screen {
         terminal.write(player.glyph(), player.x - left, player.y - top, player.color());
         String stats = String.format(" %3d/%3d hp", player.hp(), player.maxHp());
         terminal.write(stats, 1, 23);
+        displayMessages(terminal, messages);
     }
 
     @Override
@@ -73,7 +78,7 @@ public class PlayScreen implements Screen {
     }
 
     private void createCreatures(CreatureFactory creatureFactory) {
-        player = creatureFactory.newPlayer();
+        player = creatureFactory.newPlayer(messages);
 
         for (int i = 0; i < 8; i++) {
             creatureFactory.newFungus();
@@ -95,5 +100,13 @@ public class PlayScreen implements Screen {
                 terminal.write(c.glyph(), c.x - left, c.y - top, c.color());
             }
         }
+    }
+
+    private void displayMessages(AsciiPanel terminal, List<String> messages) {
+        int top = screenHeight - messages.size();
+        for (int i = 0; i < messages.size(); i++) {
+            terminal.writeCenter(messages.get(i), top + i);
+        }
+        messages.clear();
     }
 }
