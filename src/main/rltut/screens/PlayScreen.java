@@ -22,6 +22,7 @@ public class PlayScreen implements Screen {
         screenHeight = 21;
         messages = new ArrayList<>();
         createWorld();
+
         CreatureFactory creatureFactory = new CreatureFactory(world);
         createCreatures(creatureFactory);
     }
@@ -30,11 +31,12 @@ public class PlayScreen implements Screen {
     public void displayOutput(AsciiPanel terminal) {
         int left = getScrollX();
         int top = getScrollY();
+
         displayTiles(terminal, left, top);
-        terminal.write(player.glyph(), player.x - left, player.y - top, player.color());
+        displayMessages(terminal, messages);
+
         String stats = String.format(" %3d/%3d hp", player.hp(), player.maxHp());
         terminal.write(stats, 1, 23);
-        displayMessages(terminal, messages);
     }
 
     @Override
@@ -45,17 +47,22 @@ public class PlayScreen implements Screen {
             case KeyEvent.VK_ENTER:
                 return new WinScreen();
             case KeyEvent.VK_LEFT:
-            case KeyEvent.VK_H: player.moveBy(-1, 0); break;
+            case KeyEvent.VK_H: player.moveBy(-1, 0, 0); break;
             case KeyEvent.VK_RIGHT:
-            case KeyEvent.VK_L: player.moveBy( 1, 0); break;
+            case KeyEvent.VK_L: player.moveBy( 1, 0, 0); break;
             case KeyEvent.VK_UP:
-            case KeyEvent.VK_K: player.moveBy( 0,-1); break;
+            case KeyEvent.VK_K: player.moveBy( 0,-1, 0); break;
             case KeyEvent.VK_DOWN:
-            case KeyEvent.VK_J: player.moveBy( 0, 1); break;
-            case KeyEvent.VK_Y: player.moveBy(-1,-1); break;
-            case KeyEvent.VK_U: player.moveBy( 1,-1); break;
-            case KeyEvent.VK_B: player.moveBy(-1, 1); break;
-            case KeyEvent.VK_N: player.moveBy( 1, 1); break;
+            case KeyEvent.VK_J: player.moveBy( 0, 1, 0); break;
+            case KeyEvent.VK_Y: player.moveBy(-1,-1, 0); break;
+            case KeyEvent.VK_U: player.moveBy( 1,-1, 0); break;
+            case KeyEvent.VK_B: player.moveBy(-1, 1, 0); break;
+            case KeyEvent.VK_N: player.moveBy( 1, 1, 0); break;
+        }
+
+        switch (key.getKeyChar()) {
+            case '<': player.moveBy(0, 0, -1); break;
+            case '>': player.moveBy(0, 0, 1); break;
         }
 
         world.update();
@@ -72,7 +79,7 @@ public class PlayScreen implements Screen {
     }
 
     private void createWorld() {
-        world = new WorldBuilder(90, 31)
+        world = new WorldBuilder(90, 31, 5)
                 .makeCaves()
                 .build();
     }
@@ -80,8 +87,10 @@ public class PlayScreen implements Screen {
     private void createCreatures(CreatureFactory creatureFactory) {
         player = creatureFactory.newPlayer(messages);
 
-        for (int i = 0; i < 8; i++) {
-            creatureFactory.newFungus();
+        for (int z = 0; z < world.depth(); z++) {
+            for (int i = 0; i < 8; i++) {
+                creatureFactory.newFungus(z);
+            }
         }
     }
 
@@ -91,12 +100,12 @@ public class PlayScreen implements Screen {
                 int wx = x + left;
                 int wy = y + top;
 
-                terminal.write(world.glyph(wx, wy), x, y, world.color(wx, wy));
+                terminal.write(world.glyph(wx, wy, player.z), x, y, world.color(wx, wy, player.z));
             }
         }
 
         for (Creature c : world.creatures()) {
-            if((c.x >= left && c.x < left + screenWidth) && (c.y >= top && c.y < top + screenHeight)) {
+            if((c.x >= left && c.x < left + screenWidth) && (c.y >= top && c.y < top + screenHeight && c.z == player.z)) {
                 terminal.write(c.glyph(), c.x - left, c.y - top, c.color());
             }
         }
