@@ -19,4 +19,12 @@ public enum Tile {
 
     public char glyph() { return glyph; }
     public Color color() { return color; }
+
+    public boolean isDiggable() {
+        return this == Tile.WALL;
+    }
+
+    public boolean isGround() {
+        return this != WALL && this != BOUNDS;
+    }
 }
