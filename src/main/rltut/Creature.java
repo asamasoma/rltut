@@ -7,18 +7,30 @@ public class Creature {
     private CreatureAi ai;
     private Color color;
     private World world;
+    private int maxHp;
+    private int hp;
+    private int attackValue;
+    private int defenseValue;
 
     public int x;
     public int y;
 
-    public Creature(World world, char glyph, Color color) {
+    public Creature(World world, char glyph, Color color, int maxHp, int attack, int defense) {
         this.world = world;
         this.glyph = glyph;
         this.color = color;
+        this.maxHp = maxHp;
+        this.hp = maxHp;
+        this.attackValue = attack;
+        this.defenseValue = defense;
     }
 
     public char glyph() { return glyph; }
     public Color color() { return color; }
+    public int maxHp() { return maxHp; }
+    public int hp() { return hp; }
+    public int attackValue() { return attackValue; }
+    public int defenseValue() { return defenseValue; }
 
     public void setCreatureAi(CreatureAi ai) { this.ai = ai; }
 
@@ -35,7 +47,17 @@ public class Creature {
     }
 
     public void attack(Creature other) {
-        world.remove(other);
+        int amount = Math.max(0, attackValue() - other.defenseValue());
+
+        amount = (int)(Math.random() * amount) + 1;
+
+        other.modifyHp(-amount);
+    }
+
+    public void modifyHp(int amount) {
+        hp += amount;
+
+        if (hp < 1) world.remove(this);
     }
 
     public void update() {
