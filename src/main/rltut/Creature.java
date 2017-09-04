@@ -43,6 +43,8 @@ public class Creature {
     }
 
     public void moveBy(int mx, int my, int mz) {
+        if (mx == 0 && my == 0 && mz == 0)
+            return;
         Tile tile = world.tile(x + mx, y + my, z + mz);
 
         if (mz == -1) {
@@ -123,6 +125,10 @@ public class Creature {
 
     public boolean canSee(int wx, int wy, int wz) {
         return ai.canSee(wx, wy, wz);
+    }
+
+    public Creature creature(int wx, int wy, int wz) {
+        return world.creature(wx, wy, wz);
     }
 
     public Tile tile(int wx, int wy, int wz) {
