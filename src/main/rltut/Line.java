@@ -8,6 +8,7 @@ public class Line implements Iterable<Point> {
     private List<Point> points;
 
     public Line(int x0, int y0, int x1, int y1) {
+        //TODO: fix implementation to start from center of tile instead of upper-right corner
         points = new ArrayList<>();
 
         int dx = Math.abs(x1 - x0);
@@ -24,7 +25,7 @@ public class Line implements Iterable<Point> {
                 break;
 
             int e2 = err * 2;
-            if (e2 > -dx) {
+            if (e2 > -dy) {
                 err -= dy;
                 x0 += sx;
             }
