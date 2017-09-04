@@ -53,6 +53,7 @@ public class World {
     }
 
     public void addAtEmptyLocation(Creature creature, int z) {
+        // TODO: Fix this so it bails if there are no empty locations
         int x;
         int y;
 

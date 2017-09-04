@@ -3,6 +3,7 @@ package rltut;
 import java.awt.Color;
 
 public class Creature {
+    private String name;
     private char glyph;
     private CreatureAi ai;
     private Color color;
@@ -17,8 +18,9 @@ public class Creature {
     public int y;
     public int z;
 
-    public Creature(World world, char glyph, Color color, int maxHp, int attack, int defense) {
+    public Creature(World world, String name, char glyph, Color color, int maxHp, int attack, int defense) {
         this.world = world;
+        this.name = name;
         this.glyph = glyph;
         this.color = color;
         this.maxHp = maxHp;
@@ -28,6 +30,7 @@ public class Creature {
         this.visionRadius = 9;
     }
 
+    public String name() { return name; }
     public char glyph() { return glyph; }
     public Color color() { return color; }
     public int maxHp() { return maxHp; }
@@ -75,7 +78,7 @@ public class Creature {
 
         amount = (int)(Math.random() * amount) + 1;
 
-        doAction("attack the '%s' for %d damage", other.glyph, amount);
+        doAction("attack the %s for %d damage", other.name, amount);
 
         other.modifyHp(-amount);
     }
@@ -110,7 +113,7 @@ public class Creature {
                     other.notify("You " + message + ".", params);
 
                 else if (other.canSee(x, y, z))
-                    other.notify(String.format("The '%s' %s.", glyph, makeSecondPerson(message)), params);
+                    other.notify(String.format("The %s %s.", name, makeSecondPerson(message)), params);
             }
         }
     }
