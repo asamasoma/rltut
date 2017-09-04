@@ -7,6 +7,7 @@ public class Creature {
     private char glyph;
     private CreatureAi ai;
     private Color color;
+    private Inventory inventory;
     private World world;
     private int maxHp;
     private int hp;
@@ -23,6 +24,7 @@ public class Creature {
         this.name = name;
         this.glyph = glyph;
         this.color = color;
+        this.inventory = new Inventory(20);
         this.maxHp = maxHp;
         this.hp = maxHp;
         this.attackValue = attack;
@@ -33,6 +35,7 @@ public class Creature {
     public String name() { return name; }
     public char glyph() { return glyph; }
     public Color color() { return color; }
+    public Inventory inventory() { return inventory; }
     public int maxHp() { return maxHp; }
     public int hp() { return hp; }
     public int attackValue() { return attackValue; }
@@ -43,6 +46,27 @@ public class Creature {
 
     public void dig(int wx, int wy, int wz) {
         world.dig(wx, wy, wz);
+    }
+
+    public void pickup() {
+        Item item = world.item(x, y, z);
+
+        if (inventory.isFull() || item == null) {
+            doAction("grab at the ground");
+        } else {
+            doAction("pickup a %s", item.name());
+            world.remove(x, y, z);
+            inventory.add(item);
+        }
+    }
+
+    public void drop(Item item) {
+        if (world.addAtEmptySpace(item, x, y, z)) {
+            doAction("drop a " + item.name());
+            inventory.remove(item);
+        } else {
+            notify("There's nowhere to drop the %s.", item.name());
+        }
     }
 
     public void moveBy(int mx, int my, int mz) {

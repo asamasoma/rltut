@@ -23,8 +23,9 @@ public class PlayScreen implements Screen {
         createWorld();
         fov = new FieldOfView(world);
 
-        CreatureFactory creatureFactory = new CreatureFactory(world, fov);
-        createCreatures(creatureFactory);
+        StuffFactory stuffFactory = new StuffFactory(world, fov);
+        createCreatures(stuffFactory);
+        createItems(stuffFactory);
     }
 
     @Override
@@ -77,6 +78,8 @@ public class PlayScreen implements Screen {
         }
 
         switch (key.getKeyChar()) {
+            case 'g':
+            case ',': player.pickup(); break;
             case '<':
                 player.moveBy(0, 0, -1);
                 break;
@@ -107,16 +110,24 @@ public class PlayScreen implements Screen {
                 .build();
     }
 
-    private void createCreatures(CreatureFactory creatureFactory) {
-        player = creatureFactory.newPlayer(messages);
+    private void createCreatures(StuffFactory stuffFactory) {
+        player = stuffFactory.newPlayer(messages);
 
         for (int z = 0; z < world.depth(); z++) {
             for (int i = 0; i < 8; i++) {
-                creatureFactory.newFungus(z);
+                stuffFactory.newFungus(z);
             }
 
             for (int i = 0; i < 20; i++) {
-                creatureFactory.newBat(z);
+                stuffFactory.newBat(z);
+            }
+        }
+    }
+
+    private void createItems(StuffFactory factory) {
+        for (int z = 0; z < world.depth(); z++) {
+            for (int i = 0; i < world.width() * world.height() / 20; i++) {
+                factory.newRock(z);
             }
         }
     }
