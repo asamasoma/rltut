@@ -1,11 +1,9 @@
 package rltut.screens;
 
 import asciiPanel.AsciiPanel;
-import rltut.Creature;
-import rltut.CreatureFactory;
-import rltut.World;
-import rltut.WorldBuilder;
+import rltut.*;
 
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +11,7 @@ import java.util.List;
 public class PlayScreen implements Screen {
     private World world;
     private Creature player;
+    private FieldOfView fov;
     private int screenWidth;
     private int screenHeight;
     private List<String> messages;
@@ -22,8 +21,9 @@ public class PlayScreen implements Screen {
         screenHeight = 21;
         messages = new ArrayList<>();
         createWorld();
+        fov = new FieldOfView(world);
 
-        CreatureFactory creatureFactory = new CreatureFactory(world);
+        CreatureFactory creatureFactory = new CreatureFactory(world, fov);
         createCreatures(creatureFactory);
     }
 
@@ -47,22 +47,42 @@ public class PlayScreen implements Screen {
             case KeyEvent.VK_ENTER:
                 return new WinScreen();
             case KeyEvent.VK_LEFT:
-            case KeyEvent.VK_H: player.moveBy(-1, 0, 0); break;
+            case KeyEvent.VK_H:
+                player.moveBy(-1, 0, 0);
+                break;
             case KeyEvent.VK_RIGHT:
-            case KeyEvent.VK_L: player.moveBy( 1, 0, 0); break;
+            case KeyEvent.VK_L:
+                player.moveBy(1, 0, 0);
+                break;
             case KeyEvent.VK_UP:
-            case KeyEvent.VK_K: player.moveBy( 0,-1, 0); break;
+            case KeyEvent.VK_K:
+                player.moveBy(0, -1, 0);
+                break;
             case KeyEvent.VK_DOWN:
-            case KeyEvent.VK_J: player.moveBy( 0, 1, 0); break;
-            case KeyEvent.VK_Y: player.moveBy(-1,-1, 0); break;
-            case KeyEvent.VK_U: player.moveBy( 1,-1, 0); break;
-            case KeyEvent.VK_B: player.moveBy(-1, 1, 0); break;
-            case KeyEvent.VK_N: player.moveBy( 1, 1, 0); break;
+            case KeyEvent.VK_J:
+                player.moveBy(0, 1, 0);
+                break;
+            case KeyEvent.VK_Y:
+                player.moveBy(-1, -1, 0);
+                break;
+            case KeyEvent.VK_U:
+                player.moveBy(1, -1, 0);
+                break;
+            case KeyEvent.VK_B:
+                player.moveBy(-1, 1, 0);
+                break;
+            case KeyEvent.VK_N:
+                player.moveBy(1, 1, 0);
+                break;
         }
 
         switch (key.getKeyChar()) {
-            case '<': player.moveBy(0, 0, -1); break;
-            case '>': player.moveBy(0, 0, 1); break;
+            case '<':
+                player.moveBy(0, 0, -1);
+                break;
+            case '>':
+                player.moveBy(0, 0, 1);
+                break;
         }
 
         world.update();
@@ -95,17 +115,24 @@ public class PlayScreen implements Screen {
     }
 
     private void displayTiles(AsciiPanel terminal, int left, int top) {
+        fov.update(player.x, player.y, player.z, player.visionRadius());
+
         for (int x = 0; x < screenWidth; x++) {
             for (int y = 0; y < screenHeight; y++) {
                 int wx = x + left;
                 int wy = y + top;
-
-                terminal.write(world.glyph(wx, wy, player.z), x, y, world.color(wx, wy, player.z));
+                if (player.canSee(wx, wy, player.z)) {
+                    terminal.write(world.glyph(wx, wy, player.z), x, y, world.color(wx, wy, player.z));
+                } else {
+                    terminal.write(fov.tile(wx, wy, player.z).glyph(), x, y, Color.darkGray);
+                }
             }
         }
 
         for (Creature c : world.creatures()) {
-            if((c.x >= left && c.x < left + screenWidth) && (c.y >= top && c.y < top + screenHeight && c.z == player.z)) {
+            if ((c.x >= left && c.x < left + screenWidth)
+                    && (c.y >= top && c.y < top + screenHeight && c.z == player.z)
+                    && player.canSee(c.x, c.y, c.z)) {
                 terminal.write(c.glyph(), c.x - left, c.y - top, c.color());
             }
         }

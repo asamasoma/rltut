@@ -11,6 +11,7 @@ public class Creature {
     private int hp;
     private int attackValue;
     private int defenseValue;
+    private int visionRadius;
 
     public int x;
     public int y;
@@ -24,6 +25,7 @@ public class Creature {
         this.hp = maxHp;
         this.attackValue = attack;
         this.defenseValue = defense;
+        this.visionRadius = 9;
     }
 
     public char glyph() { return glyph; }
@@ -32,6 +34,7 @@ public class Creature {
     public int hp() { return hp; }
     public int attackValue() { return attackValue; }
     public int defenseValue() { return defenseValue; }
+    public int visionRadius() { return visionRadius; }
 
     public void setCreatureAi(CreatureAi ai) { this.ai = ai; }
 
@@ -115,6 +118,14 @@ public class Creature {
 
     public boolean canEnter(int wx, int wy, int wz) {
         return world.tile(wx, wy, wz).isGround() && world.creature(wx, wy, wz) == null;
+    }
+
+    public boolean canSee(int wx, int wy, int wz) {
+        return ai.canSee(wx, wy, wz);
+    }
+
+    public Tile tile(int wx, int wy, int wz) {
+        return world.tile(wx, wy, wz);
     }
 
     //TODO: move to a 'message helper' class
