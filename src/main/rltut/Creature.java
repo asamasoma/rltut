@@ -92,6 +92,7 @@ public class Creature {
     }
 
     public void doAction(String message, Object ... params) {
+        // TODO: notify within LOS instead of fixed radius?
         int r = 9;
         for (int ox = -r; ox < r + 1; ox++) {
             for (int oy = -r; oy < r + 1; oy++) {
@@ -106,7 +107,7 @@ public class Creature {
                 if (other == this)
                     other.notify("You " + message + ".", params);
 
-                else
+                else if (other.canSee(x, y, z))
                     other.notify(String.format("The '%s' %s.", glyph, makeSecondPerson(message)), params);
             }
         }
