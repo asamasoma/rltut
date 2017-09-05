@@ -37,7 +37,7 @@ public class PlayScreen implements Screen {
         displayTiles(terminal, left, top);
         displayMessages(terminal, messages);
 
-        String stats = String.format(" %3d/%3d hp", player.hp(), player.maxHp());
+        String stats = String.format(" %3d/%3d hp %8s", player.hp(), player.maxHp(), hunger());
         terminal.write(stats, 1, 23);
 
         if (subscreen != null)
@@ -79,6 +79,7 @@ public class PlayScreen implements Screen {
                     player.moveBy(1, 1, 0);
                     break;
                 case KeyEvent.VK_D: subscreen = new DropScreen(player); break;
+                case KeyEvent.VK_E: subscreen = new EatScreen(player); break;
             }
 
             switch (key.getKeyChar()) {
@@ -185,5 +186,18 @@ public class PlayScreen implements Screen {
                 return new WinScreen();
         }
         return new LoseScreen();
+    }
+
+    private String hunger() {
+        if (player.food() < player.maxFood() * 0.1)
+            return "Starving";
+        else if (player.food() < player.maxFood() * 0.2)
+            return "Hungry";
+        else if (player.food() > player.maxFood() * 0.9)
+            return "Stuffed";
+        else if (player.food() > player.maxFood() * 0.8)
+            return "Full";
+        else
+            return "";
     }
 }

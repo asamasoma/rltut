@@ -11,6 +11,8 @@ public class Creature {
     private World world;
     private int maxHp;
     private int hp;
+    private int maxFood;
+    private int food;
     private int attackValue;
     private int defenseValue;
     private int visionRadius;
@@ -27,6 +29,8 @@ public class Creature {
         this.inventory = new Inventory(20);
         this.maxHp = maxHp;
         this.hp = maxHp;
+        this.maxFood = 1000;
+        this.food = maxFood / 3 * 2;
         this.attackValue = attack;
         this.defenseValue = defense;
         this.visionRadius = 9;
@@ -38,17 +42,28 @@ public class Creature {
     public Inventory inventory() { return inventory; }
     public int maxHp() { return maxHp; }
     public int hp() { return hp; }
+    public int maxFood() { return maxFood; }
+    public int food() { return food; }
+
     public int attackValue() { return attackValue; }
     public int defenseValue() { return defenseValue; }
     public int visionRadius() { return visionRadius; }
 
     public void setCreatureAi(CreatureAi ai) { this.ai = ai; }
 
+    public void eat(Item item) {
+        modifyFood(item.foodValue());
+        inventory.remove(item);
+    }
+
     public void dig(int wx, int wy, int wz) {
+        modifyFood(-10);
         world.dig(wx, wy, wz);
+        doAction("dig");
     }
 
     public void pickup() {
+        modifyFood(-1);
         Item item = world.item(x, y, z);
 
         if (inventory.isFull() || item == null) {
@@ -61,6 +76,7 @@ public class Creature {
     }
 
     public void drop(Item item) {
+        modifyFood(-1);
         if (world.addAtEmptySpace(item, x, y, z)) {
             doAction("drop a " + item.name());
             inventory.remove(item);
@@ -72,6 +88,8 @@ public class Creature {
     public void moveBy(int mx, int my, int mz) {
         if (mx == 0 && my == 0 && mz == 0)
             return;
+
+        modifyFood(-1);
         Tile tile = world.tile(x + mx, y + my, z + mz);
 
         if (mz == -1) {
@@ -98,6 +116,7 @@ public class Creature {
     }
 
     public void attack(Creature other) {
+        modifyFood(-1);
         int amount = Math.max(0, attackValue() - other.defenseValue());
 
         amount = (int)(Math.random() * amount) + 1;
@@ -109,14 +128,29 @@ public class Creature {
 
     public void modifyHp(int amount) {
         hp += amount;
-
-        if (hp < 1) {
+        if(hp > maxHp) {
+            hp = maxHp;
+        } else if (hp < 1) {
             doAction("die");
+            leaveCorpse();
             world.remove(this);
         }
     }
 
+    public void modifyFood(int amount) {
+        food += amount;
+        if (food > maxFood) {
+            maxFood = maxFood + food / 2;
+            food = maxFood;
+            notify("You can't believe your stomach can hold that much!");
+            modifyHp(-1);
+        } else if (food < 1 && isPlayer()) {
+            modifyHp(-1000);
+        }
+    }
+
     public void update() {
+        modifyFood(-1);
         ai.onUpdate();
     }
 
@@ -144,6 +178,10 @@ public class Creature {
 
     public void notify(String message, Object ... params) {
         ai.onNotify(String.format(message, params));
+    }
+
+    public boolean isPlayer() {
+        return glyph == '@';
     }
 
     public boolean canEnter(int wx, int wy, int wz) {
@@ -174,5 +212,11 @@ public class Creature {
         }
 
         return builder.toString().trim();
+    }
+
+    private void leaveCorpse() {
+        Item corpse = new Item('%', color, name + " corpse");
+        corpse.modifyFoodValue(maxHp * 3);
+        world.addAtEmptySpace(corpse, x, y, z);
     }
 }
