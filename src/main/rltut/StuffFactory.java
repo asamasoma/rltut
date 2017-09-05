@@ -34,6 +34,12 @@ public class StuffFactory {
         return fungus;
     }
 
+    public Item newVictoryItem(int depth) {
+        Item item = new Item('*', AsciiPanel.brightWhite, "teddy bear");
+        world.addAtEmptyLocation(item, depth);
+        return item;
+    }
+
     public Item newRock(int depth) {
         Item rock = new Item(',', AsciiPanel.yellow, "rock");
         world.addAtEmptyLocation(rock, depth);

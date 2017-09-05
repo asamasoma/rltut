@@ -29,7 +29,8 @@ public class WorldBuilder {
         return randomizeTiles()
                 .smooth(8)
                 .createRegions()
-                .connectRegions();
+                .connectRegions()
+                .addExitStairs();
     }
 
     public WorldBuilder connectRegions() {
@@ -177,5 +178,19 @@ public class WorldBuilder {
             tiles[p.x][p.y][z + 1] = Tile.STAIRS_UP;
             stairs++;
         } while (candidates.size() / stairs > 250);
+    }
+
+    private WorldBuilder addExitStairs() {
+        int x = -1;
+        int y = -1;
+
+        do {
+            x = (int)(Math.random() * width);
+            y = (int)(Math.random() * height);
+        }
+        while (tiles[x][y][0] != Tile.FLOOR);
+
+        tiles[x][y][0] = Tile.STAIRS_UP;
+        return this;
     }
 }

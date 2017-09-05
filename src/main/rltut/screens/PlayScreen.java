@@ -50,10 +50,6 @@ public class PlayScreen implements Screen {
             subscreen = subscreen.respondToUserInput(key);
         } else {
             switch (key.getKeyCode()) {
-                case KeyEvent.VK_ESCAPE:
-                    return new LoseScreen();
-                case KeyEvent.VK_ENTER:
-                    return new WinScreen();
                 case KeyEvent.VK_LEFT:
                 case KeyEvent.VK_H:
                     player.moveBy(-1, 0, 0);
@@ -91,7 +87,10 @@ public class PlayScreen implements Screen {
                     player.pickup();
                     break;
                 case '<':
-                    player.moveBy(0, 0, -1);
+                    if (userIsTryingToExit())
+                        return userExits();
+                    else
+                        player.moveBy(0, 0, -1);
                     break;
                 case '>':
                     player.moveBy(0, 0, 1);
@@ -141,6 +140,7 @@ public class PlayScreen implements Screen {
                 factory.newRock(z);
             }
         }
+        factory.newVictoryItem(world.depth() - 1);
     }
 
     private void displayTiles(AsciiPanel terminal, int left, int top) {
@@ -173,5 +173,17 @@ public class PlayScreen implements Screen {
             terminal.writeCenter(messages.get(i), top + i);
         }
         messages.clear();
+    }
+
+    private boolean userIsTryingToExit() {
+        return player.z == 0 && world.tile(player.x, player.y, player.z) == Tile.STAIRS_UP;
+    }
+
+    private Screen userExits() {
+        for (Item item : player.inventory().getItems()) {
+            if (item != null && item.name().equals("teddy bear"))
+                return new WinScreen();
+        }
+        return new LoseScreen();
     }
 }
