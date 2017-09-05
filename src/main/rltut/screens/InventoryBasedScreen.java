@@ -54,7 +54,9 @@ public abstract class InventoryBasedScreen implements Screen {
     }
 
     protected abstract String getVerb();
+
     protected abstract boolean isAcceptable(Item item);
+
     protected abstract Screen use(Item item);
 
     private ArrayList<String> getList() {
@@ -68,6 +70,9 @@ public abstract class InventoryBasedScreen implements Screen {
                 continue;
 
             String line = letters.charAt(i) + " - " + item.glyph() + " " + item.name();
+
+            if (item == player.weapon() || item == player.armor())
+                line += " (equipped)";
 
             lines.add(line);
         }

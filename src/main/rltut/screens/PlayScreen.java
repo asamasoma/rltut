@@ -80,6 +80,7 @@ public class PlayScreen implements Screen {
                     break;
                 case KeyEvent.VK_D: subscreen = new DropScreen(player); break;
                 case KeyEvent.VK_E: subscreen = new EatScreen(player); break;
+                case KeyEvent.VK_W: subscreen = new EquipScreen(player); break;
             }
 
             switch (key.getKeyChar()) {
@@ -139,6 +140,10 @@ public class PlayScreen implements Screen {
         for (int z = 0; z < world.depth(); z++) {
             for (int i = 0; i < world.width() * world.height() / 20; i++) {
                 factory.newRock(z);
+            }
+            for (int i = 0; i < world.width() * world.height() / 200; i++) {
+                factory.randomArmor(z);
+                factory.randomWeapon(z);
             }
         }
         factory.newVictoryItem(world.depth() - 1);
