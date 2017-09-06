@@ -18,6 +18,10 @@ public abstract class CreatureAi {
         }
     }
 
+    public void onGainLevel() {
+        new LevelUpController().autoLevelUp(creature);
+    }
+
     public void onUpdate() { }
 
     public void onNotify(String message) { }
