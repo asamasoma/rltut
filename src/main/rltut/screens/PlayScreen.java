@@ -83,6 +83,8 @@ public class PlayScreen implements Screen {
                 case KeyEvent.VK_D: subscreen = new DropScreen(player); break;
                 case KeyEvent.VK_E: subscreen = new EatScreen(player); break;
                 case KeyEvent.VK_W: subscreen = new EquipScreen(player); break;
+                case KeyEvent.VK_X: subscreen = new ExamineScreen(player); break;
+                case KeyEvent.VK_SEMICOLON: subscreen = new LookScreen(player, "Looking", player.x - getScrollX(), player.y - getScrollY()); break;
             }
 
             switch (key.getKeyChar()) {
@@ -99,6 +101,8 @@ public class PlayScreen implements Screen {
                 case '>':
                     player.moveBy(0, 0, 1);
                     break;
+                case '?':
+                    subscreen = new HelpScreen(); break; //TODO: don't update world when leaving help screen
             }
         }
 

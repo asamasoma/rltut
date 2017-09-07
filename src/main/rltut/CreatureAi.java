@@ -34,13 +34,17 @@ public abstract class CreatureAi {
             return false;
 
         for (Point p : new Line(creature.x, creature.y, wx, wy)) {
-            if (creature.tile(p.x, p.y, wz).isGround() || p.x == wx && p.y == wy)
+            if (creature.realTile(p.x, p.y, wz).isGround() || p.x == wx && p.y == wy)
                 continue;
 
             return false;
         }
 
         return true;
+    }
+
+    public Tile rememberedTile(int wx, int wy, int wz) {
+        return Tile.UNKNOWN;
     }
 
     public void wander() {

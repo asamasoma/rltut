@@ -1,6 +1,6 @@
 package rltut;
 
-import java.awt.Color;
+import java.awt.*;
 
 public class Creature {
     private String name;
@@ -42,29 +42,58 @@ public class Creature {
         this.visionRadius = 9;
     }
 
-    public String name() { return name; }
+    public String name() {
+        return name;
+    }
 
-    public char glyph() { return glyph; }
+    public String details() {
+        return String.format("     level: %d     attack: %d     defense: %d     hp: %d",
+                level, attackValue(), defenseValue(), hp);
+    }
 
-    public Color color() { return color; }
+    public char glyph() {
+        return glyph;
+    }
 
-    public Inventory inventory() { return inventory; }
+    public Color color() {
+        return color;
+    }
 
-    public Item weapon() { return weapon; }
+    public Inventory inventory() {
+        return inventory;
+    }
 
-    public Item armor() { return armor; }
+    public Item weapon() {
+        return weapon;
+    }
 
-    public int maxHp() { return maxHp; }
+    public Item armor() {
+        return armor;
+    }
 
-    public int hp() { return hp; }
+    public int maxHp() {
+        return maxHp;
+    }
 
-    public int maxFood() { return maxFood; }
+    public int hp() {
+        return hp;
+    }
 
-    public int food() { return food; }
+    public int maxFood() {
+        return maxFood;
+    }
 
-    public int xp() { return xp; }
+    public int food() {
+        return food;
+    }
 
-    public int level() { return level; }
+    public int xp() {
+        return xp;
+    }
+
+    public int level() {
+        return level;
+    }
 
     public int attackValue() {
         return attackValue
@@ -78,9 +107,13 @@ public class Creature {
                 + (armor == null ? 0 : armor.defenseValue());
     }
 
-    public int visionRadius() { return visionRadius; }
+    public int visionRadius() {
+        return visionRadius;
+    }
 
-    public void setCreatureAi(CreatureAi ai) { this.ai = ai; }
+    public void setCreatureAi(CreatureAi ai) {
+        this.ai = ai;
+    }
 
     public void eat(Item item) {
         if (item.foodValue() < 0)
@@ -183,7 +216,7 @@ public class Creature {
         modifyFood(-1);
         int amount = Math.max(0, attackValue() - other.defenseValue());
 
-        amount = (int)(Math.random() * amount) + 1;
+        amount = (int) (Math.random() * amount) + 1;
 
         doAction("attack the %s for %d damage", other.name, amount);
 
@@ -195,7 +228,7 @@ public class Creature {
 
     public void modifyHp(int amount) {
         hp += amount;
-        if(hp > maxHp) {
+        if (hp > maxHp) {
             hp = maxHp;
         } else if (hp < 1) {
             doAction("die");
@@ -221,7 +254,7 @@ public class Creature {
 
         notify("You %s %d xp.", amount < 0 ? "lose" : "gain", amount);
 
-        while (xp > (int)(Math.pow(level, 1.5) * 20)) {
+        while (xp > (int) (Math.pow(level, 1.5) * 20)) {
             level++;
             doAction("advance to level %d", level);
             ai.onGainLevel();
@@ -265,7 +298,7 @@ public class Creature {
         ai.onUpdate();
     }
 
-    public void doAction(String message, Object ... params) {
+    public void doAction(String message, Object... params) {
         // TODO: notify within LOS instead of fixed radius?
         int r = 9;
         for (int ox = -r; ox < r + 1; ox++) {
@@ -287,7 +320,7 @@ public class Creature {
         }
     }
 
-    public void notify(String message, Object ... params) {
+    public void notify(String message, Object... params) {
         ai.onNotify(String.format(message, params));
     }
 
@@ -303,12 +336,29 @@ public class Creature {
         return ai.canSee(wx, wy, wz);
     }
 
-    public Creature creature(int wx, int wy, int wz) {
-        return world.creature(wx, wy, wz);
+    public Tile realTile(int wx, int wy, int wz) {
+        return world.tile(wx, wy, wz);
     }
 
     public Tile tile(int wx, int wy, int wz) {
-        return world.tile(wx, wy, wz);
+        if (canSee(wx, wy, wz))
+            return world.tile(wx, wy, wz);
+        else
+            return ai.rememberedTile(wx, wy, wz);
+    }
+
+    public Creature creature(int wx, int wy, int wz) {
+        if (canSee(wx, wy, wz))
+            return world.creature(wx, wy, wz);
+        else
+            return null;
+    }
+
+    public Item item(int wx, int wy, int wz) {
+        if (canSee(wx, wy, wz))
+            return world.item(wx, wy, wz);
+        else
+            return null;
     }
 
     //TODO: move to a 'message helper' class
