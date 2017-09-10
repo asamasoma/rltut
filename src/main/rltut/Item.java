@@ -7,6 +7,8 @@ public class Item {
     private Color color;
     private String name;
     private int attackValue;
+    private int thrownAttackValue;
+    private int rangedAttackValue;
     private int defenseValue;
     private int foodValue;
 
@@ -14,6 +16,7 @@ public class Item {
         this.glyph = glyph;
         this.color = color;
         this.name = name;
+        this.thrownAttackValue = 1;
     }
 
     public char glyph() { return glyph; }
@@ -24,11 +27,19 @@ public class Item {
 
     public int attackValue() { return attackValue; }
 
+    public int thrownAttackValue() { return thrownAttackValue; }
+
+    public int rangedAttackValue() { return rangedAttackValue; }
+
     public int defenseValue() { return defenseValue; }
 
     public int foodValue() { return foodValue; }
 
     public void modifyAttackValue(int amount) { attackValue += amount; }
+
+    public void modifyThrownAttackValue(int amount) { thrownAttackValue += amount; }
+
+    public void modifyRangedAttackValue(int amount) { rangedAttackValue += amount; }
 
     public void modifyDefenseValue(int amount) { defenseValue += amount; }
 
@@ -39,6 +50,12 @@ public class Item {
 
         if (attackValue != 0)
             details += "     attack: " + attackValue;
+
+        if (thrownAttackValue != 0)
+            details += "     thrown: " + thrownAttackValue;
+
+        if (rangedAttackValue != 0)
+            details += " ranged: " + rangedAttackValue;
 
         if (defenseValue != 0)
             details += "     defense: " + defenseValue;

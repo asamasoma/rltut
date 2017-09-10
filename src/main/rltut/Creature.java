@@ -209,21 +209,75 @@ public class Creature {
         if (other == null)
             ai.onEnter(x + mx, y + my, z + mz, world.tile(x + mx, y + my, z + mz));
         else
-            attack(other);
+            meleeAttack(other);
     }
 
-    public void attack(Creature other) {
-        modifyFood(-1);
-        int amount = Math.max(0, attackValue() - other.defenseValue());
+    private void commonAttack(Creature other, int attack, String action, Object ... params) {
+        modifyFood(-2);
 
-        amount = (int) (Math.random() * amount) + 1;
+        int amount = Math.max(0, attack - other.defenseValue());
 
-        doAction("attack the %s for %d damage", other.name, amount);
+        amount = (int)(Math.random() * amount) + 1;
+
+        Object[] paramsCopy = new Object[params.length + 1];
+        for (int i = 0; i < params.length; i++) {
+            paramsCopy[i] = params[i];
+        }
+        paramsCopy[paramsCopy.length - 1] = amount;
+
+        doAction(action, paramsCopy);
 
         other.modifyHp(-amount);
 
         if (other.hp < 1)
             gainXp(other);
+    }
+
+    public void meleeAttack(Creature other) {
+        commonAttack(other, attackValue(), "attack the %s for %d damage", other.name);
+    }
+
+    public void throwAttack(Item item, Creature other) {
+        commonAttack(other, attackValue / 2 + item.thrownAttackValue(), "throw a %s at the %s for %d damage", item.name(), other.name());
+    }
+
+    public void rangedWeaponAttack(Creature other) {
+        commonAttack(other, attackValue / 2 + weapon.rangedAttackValue(), "fire a %s at the %s for %d damage", weapon.name(), other.name());
+    }
+
+    private void getRidOf(Item item) {
+        inventory.remove(item);
+        unequip(item);
+    }
+
+    private void putAt(Item item, int wx, int wy, int wz) {
+        inventory.remove(item);
+        unequip(item);
+        world.addAtEmptySpace(item, wx, wy, wz);
+    }
+
+    public void throwItem(Item item, int wx, int wy, int wz) {
+        Point end = new Point(x, y, 0);
+
+        for (Point p : new Line(x, y, wx, wy)) {
+            if (!realTile(p.x, p.y, z).isGround())
+                break;
+            end = p;
+        }
+
+        wx = end.x;
+        wy = end.y;
+
+        Creature c = creature(wx, wy, wz);
+
+        if (c != null)
+            throwAttack(item, c);
+        else
+            doAction("throw a %s", item.name());
+
+        unequip(item);
+        inventory.remove(item);
+        world.addAtEmptySpace(item, wx, wy, wz);
     }
 
     public void modifyHp(int amount) {
