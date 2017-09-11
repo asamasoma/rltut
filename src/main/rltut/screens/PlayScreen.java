@@ -152,6 +152,10 @@ public class PlayScreen implements Screen {
             for (int i = 0; i < z + 3; i++) {
                 stuffFactory.newZombie(z, player);
             }
+
+            for (int i = 0; i < z + 1; i++) {
+                stuffFactory.newGoblin(z, player);
+            }
         }
     }
 

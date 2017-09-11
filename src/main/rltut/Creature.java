@@ -168,6 +168,15 @@ public class Creature {
     }
 
     public void equip(Item item) {
+        if (!inventory.contains(item)) {
+            if (inventory.isFull()) {
+                notify("Can't equip %s since you're holding too much stuff.", item.name());
+                return;
+            } else {
+                world.remove(item);
+                inventory.add(item);
+            }
+        }
         if (item.attackValue() == 0 && item.defenseValue() == 0)
             return;
 
@@ -433,5 +442,9 @@ public class Creature {
         Item corpse = new Item('%', color, name + " corpse");
         corpse.modifyFoodValue(maxHp * 3);
         world.addAtEmptySpace(corpse, x, y, z);
+        for (Item item : inventory.getItems()) {
+            if (item != null)
+                drop(item);
+        }
     }
 }

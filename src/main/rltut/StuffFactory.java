@@ -34,6 +34,15 @@ public class StuffFactory {
         return fungus;
     }
 
+    public Creature newGoblin(int depth, Creature player) {
+        Creature goblin = new Creature(world, "goblin", 'g', AsciiPanel.brightGreen, 66, 15, 5);
+        goblin.equip(randomWeapon(depth));
+        goblin.equip(randomArmor(depth));
+        world.addAtEmptyLocation(goblin, depth);
+        new GoblinAi(goblin, player);
+        return goblin;
+    }
+
     public Creature newZombie(int depth, Creature player) {
         Creature zombie = new Creature(world, "zombie", 'z', AsciiPanel.white, 50, 10, 10);
         world.addAtEmptyLocation(zombie, depth);
