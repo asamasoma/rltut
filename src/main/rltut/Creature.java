@@ -13,6 +13,8 @@ public class Creature {
     private Item armor;
     private int maxHp;
     private int hp;
+    private int regenHpCooldown;
+    private int regenHpPer1000;
     private int maxFood;
     private int food;
     private int xp;
@@ -33,6 +35,8 @@ public class Creature {
         this.inventory = new Inventory(20);
         this.maxHp = maxHp;
         this.hp = maxHp;
+        this.regenHpPer1000 = 1;
+        this.regenHpPer1000 = 10;
         this.maxFood = 1000;
         this.food = maxFood / 3 * 2;
         this.xp = 0;
@@ -300,6 +304,10 @@ public class Creature {
         }
     }
 
+    public void modifyRegenHpPer1000(int amount) {
+        regenHpPer1000 += amount;
+    }
+
     public void modifyFood(int amount) {
         food += amount;
         if (food > maxFood) {
@@ -358,6 +366,7 @@ public class Creature {
 
     public void update() {
         modifyFood(-1);
+        regenerateHealth();
         ai.onUpdate();
     }
 
@@ -445,6 +454,16 @@ public class Creature {
         for (Item item : inventory.getItems()) {
             if (item != null)
                 drop(item);
+        }
+    }
+
+    // TODO: improve regeneration when leveling up
+    private void regenerateHealth() {
+        regenHpCooldown -= regenHpPer1000;
+        if (regenHpCooldown < 0) {
+            modifyHp(1);
+            modifyFood(-1);
+            regenHpCooldown += 1000;
         }
     }
 }
