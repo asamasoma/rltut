@@ -11,6 +11,7 @@ public class Item {
     private int rangedAttackValue;
     private int defenseValue;
     private int foodValue;
+    private Effect quaffEffect;
 
     public Item(char glyph, Color color, String name) {
         this.glyph = glyph;
@@ -35,6 +36,8 @@ public class Item {
 
     public int foodValue() { return foodValue; }
 
+    public Effect quaffEffect() { return quaffEffect; }
+
     public void modifyAttackValue(int amount) { attackValue += amount; }
 
     public void modifyThrownAttackValue(int amount) { thrownAttackValue += amount; }
@@ -44,6 +47,8 @@ public class Item {
     public void modifyDefenseValue(int amount) { defenseValue += amount; }
 
     public void modifyFoodValue(int amount) { foodValue += amount; }
+
+    public void setQuaffEffect(Effect effect) { this.quaffEffect = effect; }
 
     public String details() {
         String details = "";

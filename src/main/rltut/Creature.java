@@ -1,6 +1,9 @@
 package rltut;
 
-import java.awt.*;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Creature {
     private String name;
@@ -11,6 +14,7 @@ public class Creature {
     private World world;
     private Item weapon;
     private Item armor;
+    private List<Effect> effects;
     private int maxHp;
     private int hp;
     private int regenHpCooldown;
@@ -33,6 +37,7 @@ public class Creature {
         this.glyph = glyph;
         this.color = color;
         this.inventory = new Inventory(20);
+        this.effects = new ArrayList<>();
         this.maxHp = maxHp;
         this.hp = maxHp;
         this.regenHpPer1000 = 1;
@@ -74,6 +79,8 @@ public class Creature {
     public Item armor() {
         return armor;
     }
+
+    public List<Effect> effects() { return effects; }
 
     public int maxHp() {
         return maxHp;
@@ -120,12 +127,13 @@ public class Creature {
     }
 
     public void eat(Item item) {
-        if (item.foodValue() < 0)
-            notify("Gross!");
+        doAction("eat a " + item.name());
+        consume(item);
+    }
 
-        modifyFood(item.foodValue());
-        inventory.remove(item);
-        unequip(item);
+    public void quaff(Item item) {
+        doAction("quaff a " + item.name());
+        consume(item);
     }
 
     public void dig(int wx, int wy, int wz) {
@@ -252,6 +260,7 @@ public class Creature {
 
     public void throwAttack(Item item, Creature other) {
         commonAttack(other, attackValue / 2 + item.thrownAttackValue(), "throw a %s at the %s for %d damage", item.name(), other.name());
+        other.addEffect(item.quaffEffect());
     }
 
     public void rangedWeaponAttack(Creature other) {
@@ -290,7 +299,18 @@ public class Creature {
 
         unequip(item);
         inventory.remove(item);
-        world.addAtEmptySpace(item, wx, wy, wz);
+        if (item.quaffEffect() != null)
+            world.remove(item);
+        else
+            world.addAtEmptySpace(item, wx, wy, wz);
+    }
+
+    public void modifyAttackValue(int amount) {
+        attackValue += amount;
+    }
+
+    public void modifyDefenseValue(int amount) {
+        defenseValue += amount;
     }
 
     public void modifyHp(int amount) {
@@ -365,6 +385,7 @@ public class Creature {
     }
 
     public void update() {
+        updateEffects();
         modifyFood(-1);
         regenerateHealth();
         ai.onUpdate();
@@ -431,6 +452,38 @@ public class Creature {
             return world.item(wx, wy, wz);
         else
             return null;
+    }
+
+    private void addEffect(Effect effect) {
+        if (effect == null)
+            return;
+
+        effect.start(this);
+        effects.add(effect);
+    }
+
+    private void updateEffects() {
+        List<Effect> done = new ArrayList<>();
+
+        for (Effect effect : effects) {
+            effect.update(this);
+            if (effect.isDone()) {
+                effect.end(this);
+                done.add(effect);
+            }
+        }
+
+        effects.removeAll(done);
+    }
+
+    private void consume(Item item) {
+        if (item.foodValue() < 0)
+            notify("Gross!");
+
+        addEffect(item.quaffEffect());
+
+        modifyFood(item.foodValue());
+        getRidOf(item);
     }
 
     //TODO: move to a 'message helper' class

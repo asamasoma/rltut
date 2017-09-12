@@ -87,10 +87,11 @@ public class PlayScreen implements Screen {
                 case KeyEvent.VK_SEMICOLON: subscreen = new LookScreen(player, "Looking", player.x - getScrollX(), player.y - getScrollY()); break;
                 case KeyEvent.VK_T: subscreen = new ThrowScreen(player, player.x - getScrollX(), player.y - getScrollY()); break;
                 case KeyEvent.VK_F:
-                    if (player.weapon() == null || player.weapon().rangedAttackValue() == 0)
+                    if (player.weapon() == null || player.weapon().rangedAttackValue() == 0) //TODO: find a better place for this
                         player.notify("You don't have a ranged weapon equipped.");
                     else
                         subscreen = new FireWeaponScreen(player, player.x - getScrollX(), player.y - getScrollY()); break;
+                case KeyEvent.VK_Q: subscreen = new QuaffScreen(player); break;
             }
 
             switch (key.getKeyChar()) {
@@ -164,9 +165,10 @@ public class PlayScreen implements Screen {
             for (int i = 0; i < world.width() * world.height() / 20; i++) {
                 factory.newRock(z);
             }
-            for (int i = 0; i < world.width() * world.height() / 200; i++) {
+            for (int i = 0; i < world.width() * world.height() / 300; i++) {
                 factory.randomArmor(z);
                 factory.randomWeapon(z);
+                factory.randomPotion(z);
             }
         }
         factory.newVictoryItem(world.depth() - 1);
