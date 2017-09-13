@@ -9,6 +9,15 @@ public class LevelUpController {
             new LevelUpOption("Increased hit points") {
                 public void invoke(Creature creature) { creature.gainMaxHp(); }
             },
+            new LevelUpOption("Increased hit point regeneration") {
+                public void invoke(Creature creature) { creature.gainRegenHealth(); }
+            },
+            new LevelUpOption("Increased mana") {
+                public void invoke(Creature creature) { creature.gainMaxMana(); }
+            },
+            new LevelUpOption("Increased mana regeneration") {
+                public void invoke(Creature creature) { creature.gainRegenMana(); }
+            },
             new LevelUpOption("Increased attack value") {
                 public void invoke(Creature creature) { creature.gainAttackValue(); }
             },

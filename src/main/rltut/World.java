@@ -60,6 +60,10 @@ public class World {
         if (tile(x, y, z).isDiggable()) tiles[x][y][z] = Tile.FLOOR;
     }
 
+    public void add(Creature creature) {
+        creatures.add(creature);
+    }
+
     public void addAtEmptyLocation(Creature creature, int depth) {
         // TODO: Fix this so it bails if there are no empty locations
         int x;

@@ -1,6 +1,8 @@
 package rltut;
 
-import java.awt.*;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Item {
     private char glyph;
@@ -12,12 +14,14 @@ public class Item {
     private int defenseValue;
     private int foodValue;
     private Effect quaffEffect;
+    private List<Spell> writtenSpells;
 
     public Item(char glyph, Color color, String name) {
         this.glyph = glyph;
         this.color = color;
         this.name = name;
         this.thrownAttackValue = 1;
+        this.writtenSpells = new ArrayList<>();
     }
 
     public char glyph() { return glyph; }
@@ -38,6 +42,8 @@ public class Item {
 
     public Effect quaffEffect() { return quaffEffect; }
 
+    public List<Spell> writtenSpells() { return writtenSpells; }
+
     public void modifyAttackValue(int amount) { attackValue += amount; }
 
     public void modifyThrownAttackValue(int amount) { thrownAttackValue += amount; }
@@ -49,6 +55,10 @@ public class Item {
     public void modifyFoodValue(int amount) { foodValue += amount; }
 
     public void setQuaffEffect(Effect effect) { this.quaffEffect = effect; }
+
+    public void addWrittenSpell(String name, int manaCost, Effect effect) {
+        writtenSpells.add(new Spell(name, manaCost, effect));
+    }
 
     public String details() {
         String details = "";

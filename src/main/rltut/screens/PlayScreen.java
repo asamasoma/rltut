@@ -37,7 +37,8 @@ public class PlayScreen implements Screen {
         displayTiles(terminal, left, top);
         displayMessages(terminal, messages);
 
-        String stats = String.format(" %3d/%3d hp %8s", player.hp(), player.maxHp(), hunger());
+        String stats = String.format(" %3d/%3d hp  %d/%d mana  %8s",
+                player.hp(), player.maxHp(), player.mana(), player.maxMana(), hunger());
         terminal.write(stats, 1, 23);
 
         if (subscreen != null)
@@ -92,6 +93,7 @@ public class PlayScreen implements Screen {
                     else
                         subscreen = new FireWeaponScreen(player, player.x - getScrollX(), player.y - getScrollY()); break;
                 case KeyEvent.VK_Q: subscreen = new QuaffScreen(player); break;
+                case KeyEvent.VK_R: subscreen = new ReadScreen(player, player.x - getScrollX(), player.y - getScrollY()); break;
             }
 
             switch (key.getKeyChar()) {
@@ -170,6 +172,8 @@ public class PlayScreen implements Screen {
                 factory.randomWeapon(z);
                 factory.randomPotion(z);
             }
+            factory.newWhiteMagesSpellbook(z);
+            factory.newBlueMagesSpellbook(z);
         }
         factory.newVictoryItem(world.depth() - 1);
     }
