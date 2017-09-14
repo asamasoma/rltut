@@ -102,7 +102,8 @@ public abstract class CreatureAi {
         for (Item item : creature.inventory().getItems()) {
             if (item == null || creature.weapon() == item || creature.armor() == item)
                 continue;
-
+            if (item.thrownAttackValue() <= 1)
+                continue;
             if (toThrow == null || item.thrownAttackValue() > toThrow.attackValue())
                 toThrow = item;
         }
