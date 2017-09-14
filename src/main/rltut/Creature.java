@@ -1,6 +1,6 @@
 package rltut;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,7 +86,9 @@ public class Creature {
         return armor;
     }
 
-    public List<Effect> effects() { return effects; }
+    public List<Effect> effects() {
+        return effects;
+    }
 
     public int maxHp() {
         return maxHp;
@@ -96,9 +98,13 @@ public class Creature {
         return hp;
     }
 
-    public int maxMana() { return maxMana; }
+    public int maxMana() {
+        return maxMana;
+    }
 
-    public int mana() { return mana; }
+    public int mana() {
+        return mana;
+    }
 
     public int maxFood() {
         return maxFood;
@@ -137,12 +143,12 @@ public class Creature {
     }
 
     public void eat(Item item) {
-        doAction("eat a " + item.name());
+        doAction("eat a " + nameOf(item));
         consume(item);
     }
 
     public void quaff(Item item) {
-        doAction("quaff a " + item.name());
+        doAction("quaff a " + nameOf(item));
         consume(item);
     }
 
@@ -159,7 +165,7 @@ public class Creature {
         if (inventory.isFull() || item == null) {
             doAction("grab at the ground");
         } else {
-            doAction("pickup a %s", item.name());
+            doAction("pickup a %s", nameOf(item));
             world.remove(x, y, z);
             inventory.add(item);
         }
@@ -168,11 +174,11 @@ public class Creature {
     public void drop(Item item) {
         modifyFood(-1);
         if (world.addAtEmptySpace(item, x, y, z)) {
-            doAction("drop a " + item.name());
+            doAction("drop a " + nameOf(item));
             inventory.remove(item);
             unequip(item);
         } else {
-            notify("There's nowhere to drop the %s.", item.name());
+            notify("There's nowhere to drop the %s.", nameOf(item));
         }
     }
 
@@ -181,10 +187,10 @@ public class Creature {
             return;
 
         if (item == armor) {
-            doAction("remove a " + item.name());
+            doAction("remove a " + nameOf(item));
             armor = null;
         } else if (item == weapon) {
-            doAction("put away a " + item.name());
+            doAction("put away a " + nameOf(item));
             weapon = null;
         }
     }
@@ -192,7 +198,7 @@ public class Creature {
     public void equip(Item item) {
         if (!inventory.contains(item)) {
             if (inventory.isFull()) {
-                notify("Can't equip %s since you're holding too much stuff.", item.name());
+                notify("Can't equip %s since you're holding too much stuff.", nameOf(item));
                 return;
             } else {
                 world.remove(item);
@@ -204,11 +210,11 @@ public class Creature {
 
         if (item.attackValue() >= item.defenseValue()) {
             unequip(weapon);
-            doAction("wield a " + item.name());
+            doAction("wield a " + nameOf(item));
             weapon = item;
         } else {
             unequip(armor);
-            doAction("put on a " + item.name());
+            doAction("put on a " + nameOf(item));
             armor = item;
         }
     }
@@ -243,12 +249,12 @@ public class Creature {
             meleeAttack(other);
     }
 
-    private void commonAttack(Creature other, int attack, String action, Object ... params) {
+    private void commonAttack(Creature other, int attack, String action, Object... params) {
         modifyFood(-2);
 
         int amount = Math.max(0, attack - other.defenseValue());
 
-        amount = (int)(Math.random() * amount) + 1;
+        amount = (int) (Math.random() * amount) + 1;
 
         Object[] paramsCopy = new Object[params.length + 1];
         for (int i = 0; i < params.length; i++) {
@@ -269,12 +275,23 @@ public class Creature {
     }
 
     public void throwAttack(Item item, Creature other) {
-        commonAttack(other, attackValue / 2 + item.thrownAttackValue(), "throw a %s at the %s for %d damage", item.name(), other.name());
+        commonAttack(other, attackValue / 2 + item.thrownAttackValue(), "throw a %s at the %s for %d damage", nameOf(item), other.name());
         other.addEffect(item.quaffEffect());
     }
 
     public void rangedWeaponAttack(Creature other) {
-        commonAttack(other, attackValue / 2 + weapon.rangedAttackValue(), "fire a %s at the %s for %d damage", weapon.name(), other.name());
+        commonAttack(other, attackValue / 2 + weapon.rangedAttackValue(), "fire a %s at the %s for %d damage", nameOf(weapon), other.name());
+    }
+
+    public String nameOf(Item item) {
+        return ai.getName(item);
+    }
+
+    public void learnName(Item item) {
+        if (item.appearance() != null && ai.getName(item) != null) {
+            notify("The " + item.appearance() + " is a " + item.name() + "!");
+            ai.setName(item, item.name());
+        }
     }
 
     private void getRidOf(Item item) {
@@ -305,7 +322,7 @@ public class Creature {
         if (c != null)
             throwAttack(item, c);
         else
-            doAction("throw a %s", item.name());
+            doAction("throw a %s", nameOf(item));
 
         unequip(item);
         inventory.remove(item);
@@ -361,7 +378,9 @@ public class Creature {
         mana = Math.max(0, Math.min(mana + amount, maxMana));
     }
 
-    public void modifyRegenManaPer1000(int amount) { regenManaPer1000 += amount; }
+    public void modifyRegenManaPer1000(int amount) {
+        regenManaPer1000 += amount;
+    }
 
     public void modifyFood(int amount) {
         food += amount;
@@ -392,7 +411,9 @@ public class Creature {
         }
     }
 
-    public void modifyDetectCreatures(int amount) { detectCreatures += amount; }
+    public void modifyDetectCreatures(int amount) {
+        detectCreatures += amount;
+    }
 
     public void gainXp(Creature other) {
         int amount = other.maxHp
@@ -449,7 +470,31 @@ public class Creature {
     }
 
     public void doAction(String message, Object... params) {
+        for (Creature other : getCreaturesWhoSeeMe()) {
+            if (other == this)
+                other.notify("You " + message + ".", params);
+            else
+                other.notify(String.format("The %s %s.", name, makeSecondPerson(message)), params);
+        }
+    }
+
+    public void doAction(Item item, String message, Object... params) {
+        if (hp < 1)
+            return;
+
+        for (Creature other : getCreaturesWhoSeeMe()) {
+            if (other == this) {
+                other.notify("You " + message + ".", params);
+            } else {
+                other.notify(String.format("The %s %s.", name, makeSecondPerson(message)), params);
+            }
+            other.learnName(item);
+        }
+    }
+
+    private List<Creature> getCreaturesWhoSeeMe() {
         // TODO: notify within LOS instead of fixed radius?
+        List<Creature> others = new ArrayList<>();
         int r = 9;
         for (int ox = -r; ox < r + 1; ox++) {
             for (int oy = -r; oy < r + 1; oy++) {
@@ -462,12 +507,10 @@ public class Creature {
                     continue;
 
                 if (other == this)
-                    other.notify("You " + message + ".", params);
-
-                else if (other.canSee(x, y, z))
-                    other.notify(String.format("The %s %s.", name, makeSecondPerson(message)), params);
+                    others.add(other);
             }
         }
+        return others;
     }
 
     public void notify(String message, Object... params) {
@@ -559,7 +602,7 @@ public class Creature {
     }
 
     private void leaveCorpse() {
-        Item corpse = new Item('%', color, name + " corpse");
+        Item corpse = new Item('%', color, name + " corpse", null);
         corpse.modifyFoodValue(maxHp * 3);
         world.addAtEmptySpace(corpse, x, y, z);
         for (Item item : inventory.getItems()) {

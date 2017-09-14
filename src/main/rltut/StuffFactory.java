@@ -2,15 +2,21 @@ package rltut;
 
 import asciiPanel.AsciiPanel;
 
-import java.util.List;
+import java.awt.Color;
+import java.util.*;
 
 public class StuffFactory {
     private World world;
     private FieldOfView fov;
 
+    private Map<String, Color> potionColors;
+    private List<String> potionAppearances;
+
     public StuffFactory(World world, FieldOfView fov) {
         this.world = world;
         this.fov = fov;
+
+        setUpPotionAppearances();
     }
 
     public Creature newPlayer(List<String> messages) {
@@ -36,10 +42,10 @@ public class StuffFactory {
 
     public Creature newGoblin(int depth, Creature player) {
         Creature goblin = new Creature(world, "goblin", 'g', AsciiPanel.brightGreen, 66, 0, 15, 5);
+        new GoblinAi(goblin, player); // TODO: shouldn't have to set this up first to avoid NPEs when equipping later
         goblin.equip(randomWeapon(depth));
         goblin.equip(randomArmor(depth));
         world.addAtEmptyLocation(goblin, depth);
-        new GoblinAi(goblin, player);
         return goblin;
     }
 
@@ -51,27 +57,27 @@ public class StuffFactory {
     }
 
     public Item newVictoryItem(int depth) {
-        Item item = new Item('*', AsciiPanel.brightWhite, "teddy bear");
+        Item item = new Item('*', AsciiPanel.brightWhite, "teddy bear", null);
         world.addAtEmptyLocation(item, depth);
         return item;
     }
 
     public Item newDagger(int depth) {
-        Item item = new Item(')', AsciiPanel.white, "dagger");
+        Item item = new Item(')', AsciiPanel.white, "dagger", null);
         item.modifyAttackValue(5);
         world.addAtEmptyLocation(item, depth);
         return item;
     }
 
     public Item newSword(int depth) {
-        Item item = new Item(')', AsciiPanel.brightWhite, "sword");
+        Item item = new Item(')', AsciiPanel.brightWhite, "sword", null);
         item.modifyAttackValue(10);
         world.addAtEmptyLocation(item, depth);
         return item;
     }
 
     public Item newStaff(int depth) {
-        Item item = new Item(')', AsciiPanel.yellow, "staff");
+        Item item = new Item(')', AsciiPanel.yellow, "staff", null);
         item.modifyAttackValue(5);
         item.modifyDefenseValue(3);
         world.addAtEmptyLocation(item, depth);
@@ -79,7 +85,7 @@ public class StuffFactory {
     }
 
     public Item newBow(int depth) {
-        Item item = new Item(')', AsciiPanel.yellow, "bow");
+        Item item = new Item(')', AsciiPanel.yellow, "bow", null);
         item.modifyAttackValue(1);
         item.modifyRangedAttackValue(5);
         world.addAtEmptyLocation(item, depth);
@@ -87,21 +93,21 @@ public class StuffFactory {
     }
 
     public Item newLightArmor(int depth) {
-        Item item = new Item('[', AsciiPanel.green, "tunic");
+        Item item = new Item('[', AsciiPanel.green, "tunic", null);
         item.modifyDefenseValue(2);
         world.addAtEmptyLocation(item, depth);
         return item;
     }
 
     public Item newMediumArmor(int depth) {
-        Item item = new Item('[', AsciiPanel.white, "chainmail");
+        Item item = new Item('[', AsciiPanel.white, "chainmail", null);
         item.modifyDefenseValue(4);
         world.addAtEmptyLocation(item, depth);
         return item;
     }
 
     public Item newHeavyArmor(int depth) {
-        Item item = new Item('[', AsciiPanel.brightWhite, "platemail");
+        Item item = new Item('[', AsciiPanel.brightWhite, "platemail", null);
         item.modifyDefenseValue(6);
         world.addAtEmptyLocation(item, depth);
         return item;
@@ -125,21 +131,22 @@ public class StuffFactory {
     }
 
     public Item newRock(int depth) {
-        Item rock = new Item(',', AsciiPanel.yellow, "rock");
+        Item rock = new Item(',', AsciiPanel.yellow, "rock", null);
         world.addAtEmptyLocation(rock, depth);
         return rock;
     }
 
     // TODO: figure out a better way to define potions
     public Item newPotionOfHealth(int depth) {
-        Item item = new Item('!', AsciiPanel.white, "health potion");
+        String appearance = potionAppearances.get(0); // TODO: figure out a better way to pick a random appearance
+        Item item = new Item('!', potionColors.get(appearance), "health potion", appearance);
         item.setQuaffEffect(new Effect(1) {
             public void start(Creature creature) {
                 if (creature.hp() == creature.maxHp())
                     return;
 
                 creature.modifyHp(15);
-                creature.doAction("look healthier");
+                creature.doAction(item, "look healthier");
             }
         });
 
@@ -148,14 +155,15 @@ public class StuffFactory {
     }
 
     public Item newPotionOfMana(int depth) {
-        Item item = new Item('!', AsciiPanel.white, "mana potion");
+        String appearance = potionAppearances.get(1);
+        Item item = new Item('!', potionColors.get(appearance), "mana potion", appearance);
         item.setQuaffEffect(new Effect(1) {
             public void start(Creature creature) {
                 if (creature.mana() == creature.maxMana())
                     return;
 
                 creature.modifyMana(15);
-                creature.doAction("look more magical");
+                creature.doAction(item,"look more magical");
             }
         });
 
@@ -164,10 +172,11 @@ public class StuffFactory {
     }
 
     public Item newPotionOfPoison(int depth) {
-        Item item = new Item('!', AsciiPanel.white, "poison potion");
+        String appearance = potionAppearances.get(2);
+        Item item = new Item('!', potionColors.get(appearance), "poison potion", appearance);
         item.setQuaffEffect(new Effect(20) {
             public void start(Creature creature) {
-                creature.doAction("look sick");
+                creature.doAction(item,"look sick");
             }
 
             public void update(Creature creature) {
@@ -181,12 +190,13 @@ public class StuffFactory {
     }
 
     public Item newPotionOfWarrior(int depth) {
-        Item item = new Item('!', AsciiPanel.white, "warrior's potion");
+        String appearance = potionAppearances.get(3);
+        Item item = new Item('!', potionColors.get(appearance), "warrior's potion", appearance);
         item.setQuaffEffect(new Effect(20) {
             public void start(Creature creature) {
                 creature.modifyAttackValue(5);
                 creature.modifyDefenseValue(5);
-                creature.doAction("look stronger");
+                creature.doAction(item,"look stronger");
             }
 
             public void end(Creature creature) {
@@ -210,7 +220,7 @@ public class StuffFactory {
     }
 
     public Item newWhiteMagesSpellbook(int depth) {
-        Item item = new Item('+', AsciiPanel.brightWhite, "white mage's spellbook");
+        Item item = new Item('+', AsciiPanel.brightWhite, "white mage's spellbook", null);
         item.addWrittenSpell("minor heal", 4, new Effect(1) {
             public void start (Creature creature) {
                 if (creature.hp() == creature.maxHp())
@@ -267,7 +277,7 @@ public class StuffFactory {
     }
 
     public Item newBlueMagesSpellbook(int depth) {
-        Item item = new Item('+', AsciiPanel.brightBlue, "blue mage's spellbook");
+        Item item = new Item('+', AsciiPanel.brightBlue, "blue mage's spellbook", null);
 
         item.addWrittenSpell("blood to mana", 1, new Effect(1) {
             public void start(Creature creature) {
@@ -336,5 +346,21 @@ public class StuffFactory {
 
         world.addAtEmptyLocation(item, depth);
         return item;
+    }
+
+    private void setUpPotionAppearances() {
+        potionColors = new HashMap<>();
+        potionColors.put("red potion", AsciiPanel.brightRed);
+        potionColors.put("yellow potion", AsciiPanel.brightYellow);
+        potionColors.put("green potion", AsciiPanel.brightGreen);
+        potionColors.put("cyan potion", AsciiPanel.brightCyan);
+        potionColors.put("blue potion", AsciiPanel.brightBlue);
+        potionColors.put("magenta potion", AsciiPanel.brightMagenta);
+        potionColors.put("dark potion", AsciiPanel.brightBlack);
+        potionColors.put("grey potion", AsciiPanel.white);
+        potionColors.put("light potion", AsciiPanel.brightWhite);
+
+        potionAppearances = new ArrayList<>(potionColors.keySet());
+        Collections.shuffle(potionAppearances);
     }
 }

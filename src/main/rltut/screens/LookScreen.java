@@ -20,7 +20,7 @@ public class LookScreen extends TargetBasedScreen {
 
         Item item = player.item(x, y, player.z);
         if (item != null) {
-            caption = item.glyph() + " " + item.name() + item.details();
+            caption = item.glyph() + " " + player.nameOf(item) + item.details();
             return;
         }
 

@@ -8,6 +8,7 @@ public class Item {
     private char glyph;
     private Color color;
     private String name;
+    private String appearance;
     private int attackValue;
     private int thrownAttackValue;
     private int rangedAttackValue;
@@ -16,10 +17,11 @@ public class Item {
     private Effect quaffEffect;
     private List<Spell> writtenSpells;
 
-    public Item(char glyph, Color color, String name) {
+    public Item(char glyph, Color color, String name, String appearance) {
         this.glyph = glyph;
         this.color = color;
         this.name = name;
+        this.appearance = appearance;
         this.thrownAttackValue = 1;
         this.writtenSpells = new ArrayList<>();
     }
@@ -29,6 +31,13 @@ public class Item {
     public Color color() { return color; }
 
     public String name() { return name; }
+
+    public String appearance() {
+        if (appearance == null)
+            return name;
+
+        return appearance;
+    }
 
     public int attackValue() { return attackValue; }
 

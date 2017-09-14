@@ -1,13 +1,18 @@
 package rltut;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class CreatureAi {
     protected Creature creature;
 
+    private Map<String, String> itemNames;
+
     public CreatureAi(Creature creature) {
         this.creature = creature;
         this.creature.setCreatureAi(this);
+        this.itemNames = new HashMap<>();
     }
 
     public void onEnter(int x, int y, int z, Tile tile) {
@@ -69,6 +74,15 @@ public abstract class CreatureAi {
         int my = points.get(0).y - creature.y;
 
         creature.moveBy(mx, my, 0);
+    }
+
+    public String getName(Item item) {
+        String name = itemNames.get(item.name());
+        return name == null ? item.appearance() : name;
+    }
+
+    public void setName(Item item, String name) {
+        itemNames.put(item.name(), name);
     }
 
     protected boolean canRangedWeaponAttack(Creature other) {
