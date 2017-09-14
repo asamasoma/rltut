@@ -145,7 +145,7 @@ public class StuffFactory {
                 if (creature.hp() == creature.maxHp())
                     return;
 
-                creature.modifyHp(15);
+                creature.modifyHp(15, null);
                 creature.doAction(item, "look healthier");
             }
         });
@@ -181,7 +181,7 @@ public class StuffFactory {
 
             public void update(Creature creature) {
                 super.update(creature);
-                creature.modifyHp(-1);
+                creature.modifyHp(-1, "Killed by poison.");
             }
         });
 
@@ -226,7 +226,7 @@ public class StuffFactory {
                 if (creature.hp() == creature.maxHp())
                     return;
 
-                creature.modifyHp(20);
+                creature.modifyHp(20, null);
                 creature.doAction("look healthier");
             }
         });
@@ -236,7 +236,7 @@ public class StuffFactory {
                 if (creature.hp() == creature.maxHp())
                     return;
 
-                creature.modifyHp(50);
+                creature.modifyHp(50, null);
                 creature.doAction("look healthier");
             }
         });
@@ -244,7 +244,7 @@ public class StuffFactory {
         item.addWrittenSpell("slow heal", 12, new Effect(50) {
             public void update(Creature creature) {
                 super.update(creature);
-                creature.modifyHp(2);
+                creature.modifyHp(2, null);
             }
         });
 
@@ -261,7 +261,7 @@ public class StuffFactory {
             public void update(Creature creature) {
                 super.update(creature);
                 if (Math.random() < 0.25)
-                    creature.modifyHp(1);
+                    creature.modifyHp(1, null);
             }
             public void end(Creature creature) {
                 creature.modifyAttackValue(-2);
@@ -282,7 +282,7 @@ public class StuffFactory {
         item.addWrittenSpell("blood to mana", 1, new Effect(1) {
             public void start(Creature creature) {
                 int amount = Math.min(creature.hp() - 1, creature.maxMana() - creature.mana());
-                creature.modifyHp(-amount);
+                creature.modifyHp(-amount, "Killed by having blood converted to mana.");
                 creature.modifyMana(amount);
             }
         });

@@ -14,6 +14,7 @@ public class Creature {
     private Item weapon;
     private Item armor;
     private List<Effect> effects;
+    private String causeOfDeath;
     private int maxHp;
     private int hp;
     private int regenHpCooldown;
@@ -85,10 +86,11 @@ public class Creature {
     public Item armor() {
         return armor;
     }
-
     public List<Effect> effects() {
         return effects;
     }
+
+    public String causeOfDeath() { return causeOfDeath; }
 
     public int maxHp() {
         return maxHp;
@@ -264,7 +266,7 @@ public class Creature {
 
         doAction(action, paramsCopy);
 
-        other.modifyHp(-amount);
+        other.modifyHp(-amount, String.format("Killed by a %s.", other.name())); // TODO: use proper article
 
         if (other.hp < 1)
             gainXp(other);
@@ -359,11 +361,12 @@ public class Creature {
         defenseValue += amount;
     }
 
-    public void modifyHp(int amount) {
+    public void modifyHp(int amount, String causeOfDeath) {
         hp += amount;
         if (hp > maxHp) {
             hp = maxHp;
         } else if (hp < 1) {
+            this.causeOfDeath = causeOfDeath;
             doAction("die");
             leaveCorpse();
             world.remove(this);
@@ -388,9 +391,9 @@ public class Creature {
             maxFood = maxFood + food / 2;
             food = maxFood;
             notify("You can't believe your stomach can hold that much!");
-            modifyHp(-1);
+            modifyHp(-1, "Killed by overeating.");
         } else if (food < 1 && isPlayer()) {
-            modifyHp(-1000);
+            modifyHp(-1000, "Starved to death.");
         }
     }
 
@@ -407,7 +410,7 @@ public class Creature {
             level++;
             doAction("advance to level %d", level);
             ai.onGainLevel();
-            modifyHp(level * 2);
+            modifyHp(level * 2, null);
         }
     }
 
@@ -614,7 +617,7 @@ public class Creature {
     private void regenerateHealth() {
         regenHpCooldown -= regenHpPer1000;
         if (regenHpCooldown < 0) {
-            modifyHp(1);
+            modifyHp(1, null);
             modifyFood(-1);
             regenHpCooldown += 1000;
         }
